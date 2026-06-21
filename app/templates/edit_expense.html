@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Edit Expense — Ember{% endblock %}
+{% block topbar_title %}Edit Expense{% endblock %}
+
+{% block content %}
+<div class="expense-form-page">
+    <div class="expense-form-container island">
+
+        <!-- Left: info panel -->
+        <div class="expense-info-panel">
+            <div class="coin-scene-wrap scene-wrap" data-fallback>
+                <canvas id="expense-coin" class="scene-3d"></canvas>
+            </div>
+            <div class="hero-badge" style="display:inline-flex;margin-bottom:1.2rem;background:var(--ember-dim);color:var(--ember);border-color:rgba(224,82,107,0.2);">
+                <i class="bi bi-pencil-square"></i> Editing
+            </div>
+            <h2 style="font-size:1.55rem;">Update<br><span class="text-glow">expense</span></h2>
+            <p style="margin-top:0.6rem; font-size:0.88rem; max-width:28ch;">
+                Make changes below. Your analytics and forecast will update instantly on save.
+            </p>
+
+            <!-- Current expense summary card -->
+            <div class="island" style="margin-top:1.6rem; padding:1.1rem;">
+                <div style="font-size:0.72rem; font-weight:700; color:var(--pearl-faint); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:0.7rem;">Current Values</div>
+                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.82rem; color:var(--pearl-dim);">Title</span>
+                        <span style="font-size:0.82rem; font-weight:600; color:var(--pearl); max-width:16ch; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ expense.title }}</span>
+                    </div>
+                    <div style="height:1px; background:var(--tide);"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.82rem; color:var(--pearl-dim);">Amount</span>
+                        <span style="font-family:'JetBrains Mono',monospace; font-size:0.88rem; font-weight:700; color:var(--bio);">₹ {{ expense.amount }}</span>
+                    </div>
+                    <div style="height:1px; background:var(--tide);"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.82rem; color:var(--pearl-dim);">Category</span>
+                        <span class="cat-chip cat-{{ expense.category|lower }}" style="font-size:0.72rem;">{{ expense.category }}</span>
+                    </div>
+                    <div style="height:1px; background:var(--tide);"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.82rem; color:var(--pearl-dim);">Date</span>
+                        <span style="font-size:0.82rem; color:var(--pearl-faint);">{{ expense.date }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: form -->
+        <div class="expense-form-card">
+            <div style="margin-bottom:1.6rem;">
+                <h3 style="margin-bottom:0.2rem;">Edit Expense</h3>
+                <p style="font-size:0.85rem;">Update any field and save to apply changes.</p>
+            </div>
+
+            <form method="POST" action="/edit/{{ expense.id }}" class="expense-form">
+
+                <div class="form-field">
+                    <label for="title">Expense Title</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-pencil-fill input-icon"></i>
+                        <input type="text" id="title" name="title"
+                               class="input-tidal"
+                               value="{{ expense.title }}"
+                               placeholder="e.g. Dinner at Café Ember"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="amount">Amount (₹)</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-currency-rupee input-icon"></i>
+                        <input type="number" id="amount" name="amount"
+                               class="input-tidal"
+                               value="{{ expense.amount }}"
+                               step="0.01" min="0"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="category">Category</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-tag-fill input-icon"></i>
+                        <select id="category" name="category" class="input-tidal" required>
+                            <option value="" disabled>Select a category</option>
+                            {% set cats = ['Food','Travel','Shopping','Bills','Entertainment','Health','Education','Other'] %}
+                            {% for cat in cats %}
+                            <option value="{{ cat }}" {% if expense.category == cat %}selected{% endif %}>
+                                {% if cat == 'Food' %}🍜{% elif cat == 'Travel' %}✈️{% elif cat == 'Shopping' %}🛍️{% elif cat == 'Bills' %}💡{% elif cat == 'Entertainment' %}🎮{% elif cat == 'Health' %}💊{% elif cat == 'Education' %}📚{% else %}📦{% endif %}
+                                {{ cat }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="date">Date</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-calendar3 input-icon"></i>
+                        <input type="date" id="date" name="date"
+                               class="input-tidal"
+                               value="{{ expense.date }}"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-tidal btn-primary magnetic">
+                        <i class="bi bi-check-circle-fill"></i> Update Expense
+                    </button>
+                    <a href="/dashboard" class="btn-tidal btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.querySelectorAll('.magnetic').forEach(btn => {
+            btn.addEventListener('mousemove', e => {
+                const r = btn.getBoundingClientRect();
+                btn.style.transform = `translate(${(e.clientX-r.left-r.width/2)*0.25}px,${(e.clientY-r.top-r.height/2)*0.25}px)`;
+            });
+            btn.addEventListener('mouseleave', () => { btn.style.transform='translate(0,0)'; });
+        });
+    }
+</script>
+{% endblock %}

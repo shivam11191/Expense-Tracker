@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Ember — Smart Expense Analytics{% endblock %}
+
+{% block layout %}
+<!-- Landing has its own layout — no sidebar/topbar shell -->
+
+<header class="landing-header">
+    <div class="landing-header-inner">
+        <a href="/" style="display:flex;align-items:center;gap:0.55rem;text-decoration:none;">
+            <div class="brand-icon" style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--bio),#D98A2A);display:flex;align-items:center;justify-content:center;color:#1C1006;font-size:0.9rem;box-shadow:0 4px 16px -4px var(--bio-glow);">
+                <i class="bi bi-gem"></i>
+            </div>
+            <span style="font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--pearl);">Ember</span>
+        </a>
+        <nav class="landing-nav">
+            <a href="#features">Features</a>
+            <a href="#about">About</a>
+        </nav>
+        <div class="landing-actions">
+            <a href="/login" class="btn-tidal btn-ghost btn-sm">Login</a>
+            <a href="/register" class="btn-tidal btn-primary btn-sm magnetic">Get Started</a>
+        </div>
+        <button class="landing-hamburger" onclick="toggleLandingNav()" aria-label="Menu">
+            <i class="bi bi-list"></i>
+        </button>
+    </div>
+</header>
+
+<div class="mobile-landing-nav" id="mobileLandingNav">
+    <a href="#features" onclick="toggleLandingNav()">Features</a>
+    <a href="#about" onclick="toggleLandingNav()">About</a>
+    <a href="/login" class="btn-tidal btn-ghost btn-sm" style="text-align:center;">Login</a>
+    <a href="/register" class="btn-tidal btn-primary btn-sm" style="text-align:center;">Get Started</a>
+</div>
+
+<!-- Hero -->
+<section class="hero-section reveal">
+    <div class="hero-badge">
+        <i class="bi bi-stars"></i> Finance, reimagined for 2027
+    </div>
+    <h1>Your money lives<br><span class="text-glow">in motion</span></h1>
+    <p class="hero-subtitle">
+        Ember transforms raw expense data into a breathing financial ecosystem —
+        intelligent analytics, beautiful visualizations, and effortless control.
+    </p>
+    <div class="hero-actions">
+        <a href="/register" class="btn-tidal btn-primary btn-lg magnetic">
+            <i class="bi bi-arrow-right-circle-fill"></i> Start for Free
+        </a>
+        <a href="/login" class="btn-tidal btn-secondary btn-lg">
+            <i class="bi bi-box-arrow-in-right"></i> Sign In
+        </a>
+    </div>
+</section>
+
+<!-- Live 3D Hero Sculpture -->
+<div class="hero-scene-wrap scene-wrap reveal reveal-d2" data-fallback>
+    <canvas id="hero-sculpture" class="scene-3d"></canvas>
+</div>
+
+<!-- Stat strip beneath the sculpture -->
+<div style="max-width:900px; margin:0 auto 5rem; padding:0 2rem; display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;">
+    <div class="island breathing hoverable" style="padding:1.4rem; animation-delay:0s;">
+        <div style="font-size:1.8rem; margin-bottom:0.6rem;">💳</div>
+        <div style="font-family:'Fraunces',serif; font-size:1.6rem; font-weight:600; color:var(--bio);">₹ 42,830</div>
+        <div style="font-size:0.78rem; color:var(--pearl-faint); margin-top:0.25rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;">Monthly Total</div>
+    </div>
+    <div class="island breathing hoverable" style="padding:1.4rem; animation-delay:-2.1s; margin-top:2rem;">
+        <div style="font-size:1.8rem; margin-bottom:0.6rem;">📊</div>
+        <div style="font-family:'Fraunces',serif; font-size:1.6rem; font-weight:600; color:var(--current);">Food & Travel</div>
+        <div style="font-size:0.78rem; color:var(--pearl-faint); margin-top:0.25rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;">Top Categories</div>
+    </div>
+    <div class="island breathing hoverable" style="padding:1.4rem; animation-delay:-3.8s;">
+        <div style="font-size:1.8rem; margin-bottom:0.6rem;">🎯</div>
+        <div style="font-family:'Fraunces',serif; font-size:1.6rem; font-weight:600; color:var(--ember);">87/100</div>
+        <div style="font-size:0.78rem; color:var(--pearl-faint); margin-top:0.25rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;">Health Score</div>
+    </div>
+</div>
+
+<!-- Features -->
+<section class="features-section" id="features">
+    <div style="text-align:center; max-width:540px; margin:0 auto 2.5rem;">
+        <div class="hero-badge" style="margin-bottom:0.8rem;">
+            <i class="bi bi-lightning-charge-fill"></i> Features
+        </div>
+        <h2>Everything your finances need</h2>
+        <p style="margin-top:0.6rem;">Built for people who want clarity, not complexity.</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="island feature-card-af reveal reveal-d1">
+            <div class="feature-emoji-wrap" style="background:var(--bio-dim);">🔥</div>
+            <h4>Living Dashboard</h4>
+            <p>An animated financial ecosystem that breathes and reacts to your data in real time.</p>
+        </div>
+        <div class="island feature-card-af reveal reveal-d2">
+            <div class="feature-emoji-wrap" style="background:var(--ember-dim);">📈</div>
+            <h4>Smart Analytics</h4>
+            <p>Automatic category analysis, trend detection, and a 30-day predictive forecast.</p>
+        </div>
+        <div class="island feature-card-af reveal reveal-d3">
+            <div class="feature-emoji-wrap" style="background:var(--current-dim);">🎯</div>
+            <h4>Health Score</h4>
+            <p>A single score that instantly tells you how your spending habits are performing.</p>
+        </div>
+        <div class="island feature-card-af reveal reveal-d4">
+            <div class="feature-emoji-wrap" style="background:var(--gold-dim);">🔒</div>
+            <h4>Secure & Private</h4>
+            <p>Your data stays yours. Encrypted, authenticated, and never shared.</p>
+        </div>
+        <div class="island feature-card-af reveal reveal-d5">
+            <div class="feature-emoji-wrap" style="background:var(--coral-dim);">⚡</div>
+            <h4>Instant Entry</h4>
+            <p>Add an expense in three fields. Simple, fast, and always available from the sidebar.</p>
+        </div>
+        <div class="island feature-card-af reveal reveal-d6">
+            <div class="feature-emoji-wrap" style="background:var(--teal-dim);">💎</div>
+            <h4>Spending Sculpture</h4>
+            <p>A live 3D ring built from your real category data — hover any column for details.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="about">
+    <div class="island cta-box">
+        <div class="hero-badge" style="margin-bottom:1rem;display:inline-flex;">
+            <i class="bi bi-gem"></i> Ember
+        </div>
+        <h2>Ready to dive in?</h2>
+        <p>Join and start understanding your finances in a completely new way. Free, always.</p>
+        <div class="cta-actions">
+            <a href="/register" class="btn-tidal btn-primary btn-lg magnetic">
+                <i class="bi bi-person-plus-fill"></i> Create Account
+            </a>
+            <a href="/login" class="btn-tidal btn-secondary btn-lg">
+                Sign In
+            </a>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="landing-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <i class="bi bi-gem" style="color:var(--bio);"></i> Ember
+            </div>
+            <p class="footer-copy">Built with Flask · SQLAlchemy · Chart.js</p>
+            <div class="footer-links">
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+{% endblock %}

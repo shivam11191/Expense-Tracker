@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Ember{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Welcome Banner -->
+<div class="welcome-banner reveal">
+    <div class="welcome-text">
+        <h2>Hello, <span class="text-glow">{{ current_user.username }}</span> <span style="display:inline-block; animation:floatY 2.8s ease-in-out infinite;">👋</span></h2>
+        <p>Your financial ecosystem, live and breathing.</p>
+    </div>
+    <a href="/add" class="btn-tidal btn-primary magnetic">
+        <i class="bi bi-plus-circle-fill"></i> Add Expense
+    </a>
+</div>
+
+<!-- KPI Islands — 4 across -->
+<div class="grid-4 mb-3">
+
+    <div class="island kpi-island kpi-bio hoverable tilt-soft reveal reveal-d1">
+        <div class="kpi-icon"><i class="bi bi-wallet2"></i></div>
+        <div class="kpi-info">
+            <div class="kpi-label">Total Expenses</div>
+            <div class="kpi-value mono-val">₹ {{ total }}</div>
+            <div class="kpi-sub">All time spend</div>
+        </div>
+    </div>
+
+    <div class="island kpi-island kpi-ember hoverable tilt-soft reveal reveal-d2">
+        <div class="kpi-icon"><i class="bi bi-tags-fill"></i></div>
+        <div class="kpi-info">
+            <div class="kpi-label">Top Category</div>
+            <div class="kpi-value" style="font-size:1.18rem;">{{ highest_category }}</div>
+            <div class="kpi-sub">Highest spending area</div>
+        </div>
+    </div>
+
+    <div class="island kpi-island kpi-current hoverable tilt-soft reveal reveal-d3">
+        <div class="kpi-icon"><i class="bi bi-receipt-cutoff"></i></div>
+        <div class="kpi-info">
+            <div class="kpi-label">Transactions</div>
+            <div class="kpi-value mono-val">{{ expenses|length }}</div>
+            <div class="kpi-sub">Total entries logged</div>
+        </div>
+    </div>
+
+    <div class="island kpi-island kpi-coral hoverable tilt-soft reveal reveal-d4">
+        <div class="kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="kpi-info">
+            <div class="kpi-label">30-Day Forecast</div>
+            <div class="kpi-value mono-val" style="color:var(--coral);">₹ {{ predictive_forecast }}</div>
+            <div class="kpi-sub">Projected spending</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Health Score + Charts row -->
+<div class="grid-7-5 mb-3">
+
+    <!-- Spending Ring — live 3D sculpture, real category data -->
+    <div class="island tide-surface reveal reveal-d2" style="padding:1.6rem; position:relative;">
+        <div class="chart-header" style="position:relative; z-index:2;">
+            <h5>Spending Sculpture</h5>
+            <span class="badge-tidal badge-bio"><i class="bi bi-bounding-box-circles"></i> Live · Hover a column</span>
+        </div>
+        <div class="chart-wrap ring-scene-wrap scene-wrap" style="min-height:280px;" data-fallback>
+            {% if category_data %}
+            <canvas id="spending-ring" class="scene-3d" data-categories='{{ category_data | tojson }}'></canvas>
+            <div id="ring-tooltip" class="sculpture-tooltip"></div>
+            {% else %}
+            <div class="empty-state" style="padding:2.5rem 1rem;">
+                <div class="empty-icon floating" style="width:64px;height:64px;font-size:1.6rem;"><i class="bi bi-bounding-box-circles"></i></div>
+                <p style="font-size:0.85rem;">Add an expense to bring the sculpture to life.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right column: health score + donut -->
+    <div style="display:flex; flex-direction:column; gap:1.1rem;">
+
+        <!-- Health Score Island -->
+        <div class="island hoverable tilt-soft reveal reveal-d3" style="padding:1.4rem;">
+            <div class="kpi-label" style="margin-bottom:0.8rem;">Financial Health Score</div>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div style="position:relative; width:80px; height:80px; flex-shrink:0;">
+                    <canvas id="healthGauge" width="80" height="80"></canvas>
+                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                        <span style="font-family:'Fraunces',serif; font-size:1.35rem; font-weight:600; color:var(--bio);">{{ health_score }}</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem; color:var(--pearl-faint); margin-bottom:0.3rem;">out of 100</div>
+                    <div class="pw-strength" style="width:130px; margin-bottom:0.35rem;">
+                        <div class="pw-bar {% if health_score >= 70 %}strong{% elif health_score >= 40 %}medium{% else %}weak{% endif %}" style="width:{{ health_score }}%;"></div>
+                    </div>
+                    <div style="font-size:0.78rem; font-weight:600; color:{% if health_score >= 70 %}var(--bio){% elif health_score >= 40 %}var(--gold){% else %}var(--danger){% endif %};">
+                        {% if health_score >= 70 %}Excellent{% elif health_score >= 40 %}Moderate{% else %}Needs Attention{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donut chart -->
+        <div class="island reveal reveal-d4" style="padding:1.4rem; flex:1;">
+            <div class="chart-header">
+                <h5>Distribution</h5>
+                <span class="badge-tidal badge-current"><i class="bi bi-pie-chart-fill"></i> Split</span>
+            </div>
+            <div class="chart-wrap" style="min-height:210px;">
+                <canvas id="doughnutChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Transactions Island -->
+<div class="island reveal reveal-d5" style="padding:1.6rem; overflow:hidden;">
+
+    <!-- Animated current-lines behind the panel header -->
+    <svg class="current-lines" style="position:absolute;top:0;left:0;width:100%;height:60px;overflow:visible;" aria-hidden="true">
+        <defs>
+            <linearGradient id="currentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="transparent"/>
+                <stop offset="40%" stop-color="var(--bio)" stop-opacity="0.7"/>
+                <stop offset="60%" stop-color="var(--current)" stop-opacity="0.7"/>
+                <stop offset="100%" stop-color="transparent"/>
+            </linearGradient>
+        </defs>
+        <path d="M 0 30 Q 200 10 400 30 T 800 30 T 1200 30" />
+        <path d="M 0 45 Q 300 25 600 45 T 1200 45" style="animation-delay:-1.1s; opacity:0.25;" />
+    </svg>
+
+    <div class="section-header" style="position:relative; z-index:1;">
+        <h3>Recent Transactions</h3>
+        <span class="badge-tidal badge-ember">{{ expenses|length }} entries</span>
+    </div>
+
+    {% if expenses %}
+    <div style="overflow-x:auto;">
+        <table class="table-tidal">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in expenses %}
+                <tr>
+                    <td style="font-weight:600; color:var(--pearl);">{{ expense.title }}</td>
+                    <td><span class="amount-val">₹ {{ expense.amount }}</span></td>
+                    <td>
+                        <span class="cat-chip cat-{{ expense.category|lower }}">{{ expense.category }}</span>
+                    </td>
+                    <td class="date-val">{{ expense.date }}</td>
+                    <td>
+                        <div class="actions-cell">
+                            <a href="/edit/{{ expense.id }}"
+                               class="btn-tidal btn-secondary btn-icon-sm"
+                               title="Edit expense">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="/delete/{{ expense.id }}"
+                               class="btn-tidal btn-danger btn-icon-sm"
+                               title="Delete expense"
+                               onclick="return confirm('Delete this expense?')">
+                                <i class="bi bi-trash3-fill"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon floating"><i class="bi bi-inbox-fill"></i></div>
+        <h4>No expenses yet</h4>
+        <p>Add your first expense and watch your financial ecosystem come alive.</p>
+        <a href="/add" class="btn-tidal btn-primary magnetic">
+            <i class="bi bi-plus-circle-fill"></i> Add Expense
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const categoryData = {{ category_data | tojson }};
+    const labels  = Object.keys(categoryData);
+    const values  = Object.values(categoryData);
+
+    /* Ember palette — maps to CSS accent tokens */
+    const palette = [
+        '#E0526B', /* ember (garnet rose)  */
+        '#7FAE7A', /* current (sage)       */
+        '#A87FD1', /* coral (plum)         */
+        '#C9914A', /* gold (bronze)        */
+        '#D98BA0', /* rose                 */
+        '#F2A93F', /* bio (amber, signature) */
+        '#5FA8A0', /* teal                 */
+        '#D9784F'  /* terracotta           */
+    ];
+
+    /* ── Donut Chart ── */
+    new Chart(document.getElementById('doughnutChart'), {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{
+                data: values,
+                backgroundColor: palette.slice(0, labels.length),
+                borderWidth: 2,
+                borderColor: 'rgba(20,15,18,0.9)',
+                hoverOffset: 8,
+                hoverBorderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            animation: { animateRotate: true, duration: 1100, easing: 'easeOutQuart' },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#C8AD90',
+                        font: { family: 'Inter', size: 11, weight: '600' },
+                        padding: 12,
+                        usePointStyle: true,
+                        pointStyleWidth: 8
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(20,15,18,0.92)',
+                    titleColor: '#F7F1E6',
+                    bodyColor: '#C8AD90',
+                    borderColor: 'rgba(214,168,122,0.28)',
+                    borderWidth: 1,
+                    padding: 12,
+                    cornerRadius: 10,
+                    callbacks: { label: ctx => ctx.label + ': ₹' + ctx.parsed.toLocaleString('en-IN') }
+                }
+            }
+        }
+    });
+
+    /* ── Health Score Mini Gauge (arc) ── */
+    (function() {
+        const score = {{ health_score }};
+        const canvas = document.getElementById('healthGauge');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const cx = 40, cy = 40, r = 32, lw = 7;
+        const startAngle = Math.PI * 0.75;
+        const totalArc = Math.PI * 1.5;
+
+        /* track */
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, startAngle, startAngle + totalArc);
+        ctx.strokeStyle = 'rgba(214,168,122,0.12)';
+        ctx.lineWidth = lw;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        /* fill */
+        const fillColor = score >= 70 ? '#F2A93F' : score >= 40 ? '#C9914A' : '#D6453F';
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, startAngle, startAngle + totalArc * (score / 100));
+        ctx.strokeStyle = fillColor;
+        ctx.lineWidth = lw;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        /* glow */
+        ctx.shadowBlur = 14;
+        ctx.shadowColor = fillColor;
+        ctx.stroke();
+    })();
+</script>
+{% endblock %}

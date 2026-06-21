@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ember — Smart Expense Analytics. Track, analyze and manage your finances.">
+    <title>{% block title %}Ember — Smart Expense Analytics{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tidal.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <div class="tidal-canvas">
+        <div class="grain"></div>
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="glow glow-3"></div>
+    </div>
+
+    {% block layout %}
+    <div class="app-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon"><i class="bi bi-gem"></i></div>
+                <div>
+                    <div class="brand-name">Ember</div>
+                    <div class="brand-sub">Expense Analytics</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/dashboard" class="nav-link-tidal {% block nav_dashboard %}{% endblock %}">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+                <a href="/add" class="nav-link-tidal {% block nav_add %}{% endblock %}">
+                    <i class="bi bi-plus-circle-fill"></i> Add Expense
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                {% if current_user is defined and current_user.is_authenticated %}
+                <div class="sidebar-user">
+                    <div class="user-avatar">{{ current_user.username[0]|upper }}</div>
+                    <div class="user-info">
+                        <div class="user-name">{{ current_user.username }}</div>
+                        <div class="user-email">{{ current_user.email }}</div>
+                    </div>
+                </div>
+                <a href="/logout" class="nav-link-tidal mt-1" style="color:var(--danger);">
+                    <i class="bi bi-box-arrow-left"></i> Logout
+                </a>
+                {% endif %}
+            </div>
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <span class="topbar-title">{% block topbar_title %}Dashboard{% endblock %}</span>
+                </div>
+                <div class="topbar-right">
+                    {# Quick-add intentionally lives only in the sidebar nav + dashboard welcome banner, not duplicated here #}
+                </div>
+            </header>
+
+            <div class="toast-area" id="toast-area">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="toast-item t-{{ category }}" role="alert">
+                            {% if category == 'success' %}<i class="bi bi-check-circle-fill toast-ico"></i>
+                            {% elif category == 'danger' %}<i class="bi bi-exclamation-triangle-fill toast-ico"></i>
+                            {% elif category == 'warning' %}<i class="bi bi-exclamation-circle-fill toast-ico"></i>
+                            {% else %}<i class="bi bi-info-circle-fill toast-ico"></i>{% endif %}
+                            <span>{{ message }}</span>
+                            <button class="toast-close" onclick="dismissToast(this)" aria-label="Close"><i class="bi bi-x"></i></button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <div class="page-content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">
+        <i class="bi bi-chevron-up"></i>
+    </button>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('show');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('show');
+        }
+        function dismissToast(btn) {
+            const t = btn.closest('.toast-item');
+            t.classList.add('hiding');
+            setTimeout(() => t.remove(), 250);
+        }
+        document.querySelectorAll('.toast-item').forEach(t => {
+            setTimeout(() => { if (t.parentNode) { t.classList.add('hiding'); setTimeout(() => t.remove(), 250); } }, 4500);
+        });
+        window.addEventListener('scroll', () => {
+            document.getElementById('scrollTop')?.classList.toggle('show', window.scrollY > 300);
+        });
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (!prefersReducedMotion) {
+            document.querySelectorAll('.tilt-soft').forEach(card => {
+                card.addEventListener('mousemove', e => {
+                    const rect = card.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width - 0.5;
+                    const y = (e.clientY - rect.top) / rect.height - 0.5;
+                    card.style.transform = `perspective(900px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg) translateY(-3px)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(900px) rotateY(0) rotateX(0) translateY(0)';
+                });
+            });
+
+            document.querySelectorAll('.magnetic').forEach(btn => {
+                btn.addEventListener('mousemove', e => {
+                    const r = btn.getBoundingClientRect();
+                    const mx = (e.clientX - r.left - r.width / 2) * 0.25;
+                    const my = (e.clientY - r.top - r.height / 2) * 0.25;
+                    btn.style.transform = `translate(${mx}px, ${my}px)`;
+                });
+                btn.addEventListener('mouseleave', () => { btn.style.transform = 'translate(0,0)'; });
+            });
+
+            const glows = document.querySelectorAll('.tidal-canvas .glow');
+            let rafPending = false;
+            window.addEventListener('mousemove', e => {
+                if (rafPending) return;
+                rafPending = true;
+                requestAnimationFrame(() => {
+                    const px = e.clientX / window.innerWidth - 0.5;
+                    const py = e.clientY / window.innerHeight - 0.5;
+                    glows.forEach((g, i) => {
+                        const depth = (i + 1) * 8;
+                        g.style.transform = `translate(${px * depth}px, ${py * depth}px)`;
+                    });
+                    rafPending = false;
+                });
+            });
+        }
+
+        document.querySelectorAll('.btn-tidal').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const r = btn.getBoundingClientRect();
+                btn.style.setProperty('--rx', ((e.clientX - r.left) / r.width * 100) + '%');
+                btn.style.setProperty('--ry', ((e.clientY - r.top) / r.height * 100) + '%');
+            });
+        });
+
+        function togglePw(id, btn) {
+            const inp = document.getElementById(id);
+            const ico = btn.querySelector('i');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+            ico.className = inp.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+        }
+        function pwStrength(val) {
+            let s = 0;
+            if (val.length >= 6) s++; if (val.length >= 10) s++;
+            if (/[A-Z]/.test(val)) s++; if (/[0-9]/.test(val)) s++;
+            if (/[^A-Za-z0-9]/.test(val)) s++;
+            if (s <= 2) return { c: 'weak', t: 'Weak' };
+            if (s <= 3) return { c: 'medium', t: 'Medium' };
+            return { c: 'strong', t: 'Strong' };
+        }
+        function updatePwStrength(id) {
+            const inp = document.getElementById(id);
+            const bar = document.getElementById(id + '-bar');
+            const lbl = document.getElementById(id + '-label');
+            if (!bar) return;
+            if (!inp.value.length) { bar.className = 'pw-bar'; lbl.textContent = ''; return; }
+            const r = pwStrength(inp.value);
+            bar.className = 'pw-bar ' + r.c;
+            lbl.textContent = r.t;
+        }
+        function toggleLandingNav() {
+            document.getElementById('mobileLandingNav')?.classList.toggle('open');
+        }
+    </script>
+
+    <!-- Live 3D sculptures + ambient particle field -->
+    <script src="{{ url_for('static', filename='js/tidal-particles.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/tidal-3d.js') }}"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

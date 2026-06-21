@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Create Account — Ember{% endblock %}
+
+{% block layout %}
+<div class="tidal-canvas">
+    <div class="grain"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    <div class="glow glow-3"></div>
+</div>
+
+<div class="auth-page">
+    <div class="auth-container island">
+
+        <!-- Left: Form -->
+        <div class="auth-card">
+            <a href="/" class="auth-brand">
+                <div class="brand-dot"><i class="bi bi-gem"></i></div>
+                <span>Ember</span>
+            </a>
+
+            <h1>Create account</h1>
+            <p class="auth-subtext">Join Ember and bring your finances to life.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="toast-item t-{{ category }}" style="margin-bottom:1rem;position:static;min-width:auto;animation:none;">
+                        {% if category == 'success' %}<i class="bi bi-check-circle-fill toast-ico"></i>
+                        {% elif category == 'danger' %}<i class="bi bi-exclamation-triangle-fill toast-ico"></i>
+                        {% elif category == 'warning' %}<i class="bi bi-exclamation-circle-fill toast-ico"></i>
+                        {% else %}<i class="bi bi-info-circle-fill toast-ico"></i>{% endif %}
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/register" class="auth-form">
+
+                <div class="form-field">
+                    <label for="username">Full name</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person-fill input-icon"></i>
+                        <input type="text" id="username" name="username"
+                               class="input-tidal"
+                               placeholder="Your name"
+                               required autocomplete="name">
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="email">Email address</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope-fill input-icon"></i>
+                        <input type="email" id="email" name="email"
+                               class="input-tidal"
+                               placeholder="you@example.com"
+                               required autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="password">Password</label>
+                    <div class="input-wrap" style="position:relative;">
+                        <i class="bi bi-lock-fill input-icon"></i>
+                        <input type="password" id="password" name="password"
+                               class="input-tidal"
+                               placeholder="Create a strong password"
+                               required autocomplete="new-password"
+                               oninput="updatePwStrength('password')"
+                               style="padding-right:3rem;">
+                        <button type="button" class="pw-toggle" onclick="togglePw('password', this)" aria-label="Toggle password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div class="pw-strength">
+                        <div class="pw-bar" id="password-bar"></div>
+                    </div>
+                    <div class="pw-label" id="password-label"></div>
+                </div>
+
+                <button type="submit" class="btn-tidal btn-primary btn-lg auth-submit magnetic">
+                    <i class="bi bi-person-plus-fill"></i> Create Account
+                </button>
+            </form>
+
+            <p class="auth-footer-link">
+                Already have an account? <a href="/login">Sign in</a>
+            </p>
+        </div>
+
+        <!-- Right: Visual panel -->
+        <div class="auth-side">
+            <div class="orb-scene-wrap scene-wrap" data-fallback>
+                <canvas id="auth-orb" class="scene-3d"></canvas>
+            </div>
+
+            <div class="hero-badge" style="display:inline-flex;margin-bottom:1.2rem;">
+                <i class="bi bi-stars"></i> Free Forever
+            </div>
+            <h2>Start your<br><span class="text-glow">financial journey</span></h2>
+            <p style="margin-top:0.6rem; font-size:0.9rem;">
+                Everything you need to understand and take control of your money, beautifully designed.
+            </p>
+            <div class="auth-features">
+                <div class="auth-feat">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    <span>Unlimited expense tracking, always free</span>
+                </div>
+                <div class="auth-feat">
+                    <i class="bi bi-pie-chart-fill"></i>
+                    <span>Auto-categorization with visual breakdowns</span>
+                </div>
+                <div class="auth-feat">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Predictive forecast powered by your history</span>
+                </div>
+                <div class="auth-feat">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    <span>Living dashboard with floating islands UI</span>
+                </div>
+            </div>
+
+            <!-- Decorative floating chips -->
+            <div style="margin-top:1.6rem; display:flex; flex-wrap:wrap; gap:0.5rem;">
+                <span class="cat-chip cat-food">🍜 Food</span>
+                <span class="cat-chip cat-travel">✈️ Travel</span>
+                <span class="cat-chip cat-shopping">🛍️ Shopping</span>
+                <span class="cat-chip cat-bills">💡 Bills</span>
+                <span class="cat-chip cat-health">💊 Health</span>
+                <span class="cat-chip cat-entertainment">🎮 Entertainment</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

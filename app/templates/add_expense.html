@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Add Expense — Ember{% endblock %}
+{% block nav_add %}active{% endblock %}
+{% block topbar_title %}Add Expense{% endblock %}
+
+{% block content %}
+<div class="expense-form-page">
+    <div class="expense-form-container island">
+
+        <!-- Left: info panel -->
+        <div class="expense-info-panel">
+            <div class="coin-scene-wrap scene-wrap" data-fallback>
+                <canvas id="expense-coin" class="scene-3d"></canvas>
+            </div>
+            <div class="hero-badge" style="display:inline-flex;margin-bottom:1.2rem;">
+                <i class="bi bi-plus-circle-fill"></i> New Entry
+            </div>
+            <h2 style="font-size:1.55rem;">Log an<br><span class="text-glow">expense</span></h2>
+            <p style="margin-top:0.6rem; font-size:0.88rem; max-width:28ch;">
+                Every entry sharpens your analytics, improves your forecast, and updates your health score.
+            </p>
+
+            <div style="margin-top:1.6rem; display:flex; flex-direction:column; gap:0.6rem;">
+                <div class="auth-feat">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <span>Instant dashboard update on save</span>
+                </div>
+                <div class="auth-feat">
+                    <i class="bi bi-tags-fill"></i>
+                    <span>8 smart expense categories</span>
+                </div>
+                <div class="auth-feat">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Forecast recalculated automatically</span>
+                </div>
+            </div>
+
+            <!-- Category preview chips -->
+            <div style="margin-top:1.6rem; display:flex; flex-wrap:wrap; gap:0.45rem;">
+                <span class="cat-chip cat-food">Food</span>
+                <span class="cat-chip cat-travel">Travel</span>
+                <span class="cat-chip cat-shopping">Shopping</span>
+                <span class="cat-chip cat-bills">Bills</span>
+                <span class="cat-chip cat-health">Health</span>
+                <span class="cat-chip cat-entertainment">Entertainment</span>
+                <span class="cat-chip cat-education">Education</span>
+                <span class="cat-chip cat-other">Other</span>
+            </div>
+        </div>
+
+        <!-- Right: form -->
+        <div class="expense-form-card">
+            <div style="margin-bottom:1.6rem;">
+                <h3 style="margin-bottom:0.2rem;">New Expense</h3>
+                <p style="font-size:0.85rem;">Fill in the details below to log your expense.</p>
+            </div>
+
+            <form method="POST" action="/add" class="expense-form">
+
+                <div class="form-field">
+                    <label for="title">Expense Title</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-pencil-fill input-icon"></i>
+                        <input type="text" id="title" name="title"
+                               class="input-tidal"
+                               placeholder="e.g. Dinner at Café Ember"
+                               required autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="amount">Amount (₹)</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-currency-rupee input-icon"></i>
+                        <input type="number" id="amount" name="amount"
+                               class="input-tidal"
+                               placeholder="0.00"
+                               step="0.01" min="0"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="category">Category</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-tag-fill input-icon"></i>
+                        <select id="category" name="category" class="input-tidal" required>
+                            <option value="" disabled selected>Select a category</option>
+                            <option value="Food">🍜 Food</option>
+                            <option value="Travel">✈️ Travel</option>
+                            <option value="Shopping">🛍️ Shopping</option>
+                            <option value="Bills">💡 Bills</option>
+                            <option value="Entertainment">🎮 Entertainment</option>
+                            <option value="Health">💊 Health</option>
+                            <option value="Education">📚 Education</option>
+                            <option value="Other">📦 Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="date">Date</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-calendar3 input-icon"></i>
+                        <input type="date" id="date" name="date"
+                               class="input-tidal"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-tidal btn-primary magnetic">
+                        <i class="bi bi-check-circle-fill"></i> Save Expense
+                    </button>
+                    <a href="/dashboard" class="btn-tidal btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Default date to today
+    const dateInp = document.getElementById('date');
+    if (dateInp && !dateInp.value) {
+        dateInp.value = new Date().toISOString().split('T')[0];
+    }
+    // Re-apply tilt & magnetic for this page's dynamically rendered buttons
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.querySelectorAll('.magnetic').forEach(btn => {
+            btn.addEventListener('mousemove', e => {
+                const r = btn.getBoundingClientRect();
+                btn.style.transform = `translate(${(e.clientX-r.left-r.width/2)*0.25}px,${(e.clientY-r.top-r.height/2)*0.25}px)`;
+            });
+            btn.addEventListener('mouseleave', () => { btn.style.transform='translate(0,0)'; });
+        });
+    }
+</script>
+{% endblock %}
